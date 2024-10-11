@@ -20,7 +20,20 @@ recovery_from_sdcard=setenv bootargs ${bootargs} aml_dt=${aml_dt} recovery_part=
 recovery_from_udisk=setenv bootargs ${bootargs} aml_dt=${aml_dt} recovery_part={recovery_part} recovery_offset={recovery_offset};if fatload usb 0 ${loadaddr} aml_autoscript; then autoscr ${loadaddr}; fi;if fatload usb 0 ${loadaddr} recovery.img; then if fatload usb 0 ${dtb_mem_addr} dtb.img; then echo udisk dtb.img loaded; fi;wipeisb; bootm ${loadaddr};fi;
 ```
 
-Т.е. при запуске recovery mode (чаще всего загрузка с зажатой кнопкой питания или кнопкой внутри AV выхода), происходит попытка найти  aml_autoscript на единственном fat разделе mmc или usb и запустить его.
+Т.е. при запуске recovery mode (чаще всего загрузка с зажатой кнопкой питания или кнопкой внутри AV выхода), происходит попытка найти  aml_autoscript на единственном fat разделе mmc или usb 
+
+```
+if fatload mmc 0 ${loadaddr} aml_autoscript;
+if fatload usb 0 ${loadaddr} aml_autoscript;
+```
+
+и запустить его
+
+```
+## u-boot help
+## autoscr - run script from memory
+autoscr ${loadaddr};
+```
 
 #### Как запустить загрузку с разных разделов на mmc, как это делает Armbian?
 
@@ -39,9 +52,13 @@ setenv start_emmc_autoscript 'echo "Try start emmc_autoscript mmc 1..."; echo; e
 
 И если нужно сохранить это действие в постоянной памяти, то можно это сделать написав `saveenv`.
 
-Даные переменные можно прописать напрямую через UART подключение в консоль u-boot, либо через сборку `aml_autoscript`, который можно загрузить из recovery режима или при помощи стандартной утилиты обновления прошивки в android.
+Даные переменные можно прописать напрямую через UART подключение в консоль u-boot.
+
+Либо через сборку `aml_autoscript`, который можно загрузить из recovery режима или при помощи стандартной утилиты обновления прошивки в android.
 
 Полный скрипт можно найти тут [https://github.com/EvgeniyBlinov/x96-uboot/blob/main/script/s905_init_aml_autoscript.txt](https://github.com/EvgeniyBlinov/x96-uboot/blob/main/script/s905_init_aml_autoscript.txt)
 
-Инструкция по сборки [https://github.com/EvgeniyBlinov/x96-uboot/blob/main/README.md](https://github.com/EvgeniyBlinov/x96-uboot/blob/main/README.md)
+Инструкция по сборке [https://github.com/EvgeniyBlinov/x96-uboot/blob/main/README.md](https://github.com/EvgeniyBlinov/x96-uboot/blob/main/README.md)
+
+Либо если есть root на загруженном android и там есть утилиты `fw_printenv`, `fw_saveenv`.
 
