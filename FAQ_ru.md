@@ -62,3 +62,52 @@ setenv start_emmc_autoscript 'echo "Try start emmc_autoscript mmc 1..."; echo; e
 
 Либо если есть root на загруженном android и там есть утилиты `fw_printenv`, `fw_saveenv`.
 
+#### Как сделать загузочную SDCARD для amlogic?
+
+Инструкция для Linux.
+
+Нужно скачать и собрать утилиту [https://github.com/7Ji/ampart](https://github.com/7Ji/ampart)
+
+```
+mkdir -p ~/PROJECTS/src/github.com/7Ji
+cd ~/PROJECTS/src/github.com/7Ji
+git clone https://github.com/7Ji/ampart
+cd ./ampart
+make
+```
+
+Нужно установить [https://github.com/superna9999/pyamlboot](https://github.com/superna9999/pyamlboot)
+
+```
+python3 -m venv ~/PROJECTS/src/github.com/7Ji/ampart/.python
+source ~/PROJECTS/src/github.com/7Ji/ampart/.python/bin/activate
+pip install --upgrade pip
+pip install pyamlboot
+```
+
+Разметка SDCARD и установка загузчика на примере приставки X96 и SDCARD `/dev/mmcblk0`
+
+```
+## https://github.com/ophub/amlogic-s9xxx-armbian/blob/main/build-armbian/armbian-files/platform-files/amlogic/rootfs/usr/sbin/armbian-install#L359
+# After using the ampart to part disk, space after [ 117 MiB ] could be used.
+export BLANK1="117"
+export BOOT="512"
+export BLANK2="0"
+
+## mmc device
+export DEV_EMMC=/dev/mmcblk0
+
+sudo ./ampart ${DEV_EMMC} --mode dclone data::-1:4
+
+echo -e "${INFO} Start create MBR and partittion."
+sudo parted -s "${DEV_EMMC}" mklabel msdos
+sudo parted -s "${DEV_EMMC}" mkpart primary fat32 $((BLANK1))MiB $((BLANK1 + BOOT - 1))MiB
+sudo parted -s "${DEV_EMMC}" mkpart primary ${file_system_type} $((BLANK1 + BOOT + BLANK2))MiB 100%
+[[ "${?}" -eq "0" ]] || error_msg "Failed to partition internal eMMC using [ parted ]."
+
+export UBOOT_PATH=~/PROJECTS/src/github.com/7Ji/ampart/.python/lib/python3.12/site-packages/files/p212/u-boot.bin.sd.bin
+sudo dd if="${UBOOT_PATH}" of="${DEV_EMMC}" conv=fsync bs=1 count=444
+sudo dd if="${UBOOT_PATH}" of="${DEV_EMMC}" conv=fsync bs=512 skip=1 seek=1
+sync
+```
+
