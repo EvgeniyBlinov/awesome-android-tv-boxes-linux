@@ -111,3 +111,11 @@ sudo dd if="${UBOOT_PATH}" of="${DEV_EMMC}" conv=fsync bs=512 skip=1 seek=1
 sync
 ```
 
+#### Информация о Device Tree.
+
+* [https://devdotnet.org/post/rabota-s-gpio-na-primere-banana-pi-bpi-m64-chast-2-device-tree-overlays/](https://devdotnet.org/post/rabota-s-gpio-na-primere-banana-pi-bpi-m64-chast-2-device-tree-overlays/)
+* [https://github.com/mykhani/device-tree-guide](Device Tree guide [EN])
+* [https://community.arm.com/oss-platforms/w/docs/525/device-tree](https://community.arm.com/oss-platforms/w/docs/525/device-tree)
+* [https://habr.com/ru/articles/413249/](Habr: Пишем модуль ядра Linux: I2C)
+
+
