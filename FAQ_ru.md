@@ -111,6 +111,48 @@ sudo dd if="${UBOOT_PATH}" of="${DEV_EMMC}" conv=fsync bs=512 skip=1 seek=1
 sync
 ```
 
+#### u-boot загрузка по tftp
+
+tftp server
+
+```
+apt install -y \
+    tftpd-hpa
+cat /etc/conf.d/tftpd
+
+
+ip a a 192.168.0.1/24 dev eth0
+ip link set dev eth0 up
+```
+
+u-boot
+
+```
+setenv ipaddr 192.168.0.2
+setenv serverip 192.168.0.1
+ping 192.168.0.1
+
+## u-boot cnainloading
+tftp ${dtb_mem_addr} u-boot.orig.bin
+go ${dtb_mem_addr}
+
+
+## Check env variables (Example: Amlogic p212)
+## fdt_addr_r=0x08008000
+## kernel_addr_r=0x08080000
+## ramdisk_addr_r=0x13000000
+
+## load linux
+tftp ${fdt_addr_r} megafon-meson-gxl-s905x-p212.dtb
+tftp ${kernel_addr_r} Image
+tftp ${ramdisk_addr_r} uInitrd
+
+## set correct bootargs
+setenv bootargs 'console=ttyAML0,115200 console=tty0 no_console_suspend consoleblank=0 rw net.ifnames=0'
+## boot image
+booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
+```
+
 #### Информация о Device Tree.
 
 * [https://devdotnet.org/post/rabota-s-gpio-na-primere-banana-pi-bpi-m64-chast-2-device-tree-overlays/](https://devdotnet.org/post/rabota-s-gpio-na-primere-banana-pi-bpi-m64-chast-2-device-tree-overlays/)
