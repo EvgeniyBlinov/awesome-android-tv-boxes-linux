@@ -118,8 +118,16 @@ tftp server
 ```
 apt install -y \
     tftpd-hpa
-cat /etc/conf.d/tftpd
+cat > /etc/conf.d/tftpd <<-'EOF'
+TFTPD_ARGS="-4 --secure /srv/tftp/"
+EOF
+systemctl start tftpd.service
 
+## find open tftp port
+ss -unlp |grep tftp
+
+## Test downloading file
+curl -o /dev/null  tftp://127.0.0.1/Image
 
 ip a a 192.168.0.1/24 dev eth0
 ip link set dev eth0 up
